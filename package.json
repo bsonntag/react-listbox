@@ -1,9 +1,9 @@
 {
-  "name": "react-select",
+  "name": "@bsonntag/react-listbox",
   "version": "0.0.0",
-  "description": "A customizable, accessible and controllable select for React.",
+  "description": "A customizable, accessible and controllable listbox component for React.",
   "main": "index.js",
-  "repository": "git@github.com:bsonntag/react-select.git",
+  "repository": "git@github.com:bsonntag/react-listbox.git",
   "author": "Benjamim Sonntag <benjamimsonntag@gmail.com>",
   "license": "MIT",
   "private": true,
