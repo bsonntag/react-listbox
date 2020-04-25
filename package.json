@@ -2,6 +2,15 @@
   "name": "@bsonntag/react-listbox",
   "version": "0.1.0",
   "description": "A customizable, accessible and controllable listbox component for React.",
+  "keywords": [
+    "react",
+    "listbox",
+    "select",
+    "component",
+    "customizable",
+    "accessible",
+    "controllable"
+  ],
   "main": "dist/index.js",
   "files": [
     "dist/*"
