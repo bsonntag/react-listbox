@@ -1,6 +1,6 @@
 {
   "name": "@bsonntag/react-listbox",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A customizable, accessible and controllable listbox component for React.",
   "main": "dist/index.js",
   "files": [
