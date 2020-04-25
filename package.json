@@ -1,0 +1,27 @@
+{
+  "name": "react-select",
+  "version": "0.0.0",
+  "description": "A customizable, accessible and controllable select for React.",
+  "main": "index.js",
+  "repository": "git@github.com:bsonntag/react-select.git",
+  "author": "Benjamim Sonntag <benjamimsonntag@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write \"./**/*.{js,json}\"",
+    "lint": "eslint .",
+    "storybook": "start-storybook"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@bsonntag/eslint-config": "^0.6.0",
+    "@storybook/react": "^5.3.18",
+    "babel-loader": "^8.1.0",
+    "eslint": "^6.8.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.7",
+    "prettier": "^2.0.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
+}
