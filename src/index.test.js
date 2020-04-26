@@ -246,4 +246,28 @@ describe('Listbox', () => {
       getByRole('option', { name: 'Orange' })
     );
   });
+
+  it('should close the options list when the escape key is pressed on an option', () => {
+    const { getByLabelText, getByRole } = render(
+      <Listbox value='apple'>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    fireEvent.keyDown(window.document.activeElement, { key: 'Escape' });
+
+    expect(getByRole('listbox', { hidden: true })).not.toBeVisible();
+  });
 });

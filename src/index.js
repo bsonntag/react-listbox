@@ -129,7 +129,7 @@ export function ListboxList({ children, ...rest }) {
       role='listbox'
       hidden={!isExpanded}
       onKeyDown={(event) => {
-        if (event.key === 'Tab') {
+        if (event.key === 'Tab' || event.key === 'Escape') {
           setExpanded(false);
         } else if (
           event.key === 'Home' ||
