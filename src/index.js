@@ -4,7 +4,6 @@ const ValueContext = React.createContext();
 const OnChangeContext = React.createContext();
 const LabelContext = React.createContext();
 const ExpandedContext = React.createContext();
-const OptionsContext = React.createContext();
 
 function moveDown(children, value, onChange) {
   const selectedIndex = children.findIndex((child) => {
@@ -40,7 +39,6 @@ function moveToBottom(children, value, onChange) {
 
 export function Listbox({ children, value, onChange, ...rest }) {
   const ref = React.useRef();
-  const optionRefs = React.useRef([]);
   const [label, setLabel] = React.useState(null);
   const [isExpanded, setExpanded] = React.useState(false);
   const labelContextValue = React.useMemo(() => ({ label, setLabel }), [label]);
@@ -48,20 +46,6 @@ export function Listbox({ children, value, onChange, ...rest }) {
     () => ({ isExpanded, setExpanded }),
     [isExpanded]
   );
-
-  React.useEffect(() => {
-    if (isExpanded) {
-      const selectedChild = optionRefs.current.find((option) => {
-        return option.getValue() === value;
-      });
-
-      if (selectedChild) {
-        selectedChild.focus();
-      } else {
-        optionRefs.current[0].focus();
-      }
-    }
-  }, [isExpanded, value]);
 
   React.useEffect(() => {
     function handleWindowClick(event) {
@@ -79,17 +63,15 @@ export function Listbox({ children, value, onChange, ...rest }) {
 
   return (
     <div {...rest} ref={ref}>
-      <OptionsContext.Provider value={optionRefs.current}>
-        <ExpandedContext.Provider value={expandedContextValue}>
-          <OnChangeContext.Provider value={onChange}>
-            <LabelContext.Provider value={labelContextValue}>
-              <ValueContext.Provider value={value}>
-                {children}
-              </ValueContext.Provider>
-            </LabelContext.Provider>
-          </OnChangeContext.Provider>
-        </ExpandedContext.Provider>
-      </OptionsContext.Provider>
+      <ExpandedContext.Provider value={expandedContextValue}>
+        <OnChangeContext.Provider value={onChange}>
+          <LabelContext.Provider value={labelContextValue}>
+            <ValueContext.Provider value={value}>
+              {children}
+            </ValueContext.Provider>
+          </LabelContext.Provider>
+        </OnChangeContext.Provider>
+      </ExpandedContext.Provider>
     </div>
   );
 }
@@ -122,10 +104,24 @@ export function ListboxButtonLabel() {
 }
 
 export function ListboxList({ children, ...rest }) {
+  const optionRefs = React.useRef([]);
   const { isExpanded, setExpanded } = React.useContext(ExpandedContext);
-  const options = React.useContext(OptionsContext);
   const onChange = React.useContext(OnChangeContext);
   const value = React.useContext(ValueContext);
+
+  React.useEffect(() => {
+    if (isExpanded) {
+      const selectedChild = optionRefs.current.find((option) => {
+        return option.getValue() === value;
+      });
+
+      if (selectedChild) {
+        selectedChild.focus();
+      } else {
+        optionRefs.current[0].focus();
+      }
+    }
+  }, [isExpanded, value]);
 
   return (
     <ul
@@ -139,23 +135,23 @@ export function ListboxList({ children, ...rest }) {
           event.key === 'Home' ||
           (event.key === 'ArrowUp' && event.metaKey)
         ) {
-          return moveToTop(options, value, onChange);
+          return moveToTop(optionRefs.current, value, onChange);
         } else if (
           event.key === 'End' ||
           (event.key === 'ArrowDown' && event.metaKey)
         ) {
-          return moveToBottom(options, value, onChange);
+          return moveToBottom(optionRefs.current, value, onChange);
         } else if (event.key === 'ArrowUp' || event.key === 'Up') {
-          return moveUp(options, value, onChange);
+          return moveUp(optionRefs.current, value, onChange);
         } else if (event.key === 'ArrowDown' || event.key === 'Down') {
-          return moveDown(options, value, onChange);
+          return moveDown(optionRefs.current, value, onChange);
         }
       }}
     >
       {React.Children.map(children, (child, index) => {
         return React.cloneElement(child, {
           ref: (element) => {
-            options[index] = element;
+            optionRefs.current[index] = element;
           },
         });
       })}
