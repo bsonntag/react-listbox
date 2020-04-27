@@ -40,7 +40,6 @@ var ValueContext = React.createContext();
 var OnChangeContext = React.createContext();
 var LabelContext = React.createContext();
 var ExpandedContext = React.createContext();
-var OptionsContext = React.createContext();
 
 function moveDown(children, value, onChange) {
   var selectedIndex = children.findIndex(function (child) {
@@ -81,7 +80,6 @@ function Listbox(_ref) {
       rest = _objectWithoutProperties(_ref, ["children", "value", "onChange"]);
 
   var ref = React.useRef();
-  var optionRefs = React.useRef([]);
 
   var _React$useState = React.useState(null),
       _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -106,19 +104,6 @@ function Listbox(_ref) {
     };
   }, [isExpanded]);
   React.useEffect(function () {
-    if (isExpanded) {
-      var selectedChild = optionRefs.current.find(function (option) {
-        return option.getValue() === value;
-      });
-
-      if (selectedChild) {
-        selectedChild.focus();
-      } else {
-        optionRefs.current[0].focus();
-      }
-    }
-  }, [isExpanded, value]);
-  React.useEffect(function () {
     function handleWindowClick(event) {
       if (!ref.current.contains(event.target)) {
         setExpanded(false);
@@ -132,9 +117,7 @@ function Listbox(_ref) {
   }, []);
   return /*#__PURE__*/React.createElement("div", _extends({}, rest, {
     ref: ref
-  }), /*#__PURE__*/React.createElement(OptionsContext.Provider, {
-    value: optionRefs.current
-  }, /*#__PURE__*/React.createElement(ExpandedContext.Provider, {
+  }), /*#__PURE__*/React.createElement(ExpandedContext.Provider, {
     value: expandedContextValue
   }, /*#__PURE__*/React.createElement(OnChangeContext.Provider, {
     value: onChange
@@ -142,7 +125,7 @@ function Listbox(_ref) {
     value: labelContextValue
   }, /*#__PURE__*/React.createElement(ValueContext.Provider, {
     value: value
-  }, children))))));
+  }, children)))));
 }
 
 function ListboxButton(_ref2) {
@@ -180,33 +163,47 @@ function ListboxList(_ref3) {
   var children = _ref3.children,
       rest = _objectWithoutProperties(_ref3, ["children"]);
 
+  var optionRefs = React.useRef([]);
+
   var _React$useContext3 = React.useContext(ExpandedContext),
       isExpanded = _React$useContext3.isExpanded,
       setExpanded = _React$useContext3.setExpanded;
 
-  var options = React.useContext(OptionsContext);
   var onChange = React.useContext(OnChangeContext);
   var value = React.useContext(ValueContext);
+  React.useEffect(function () {
+    if (isExpanded) {
+      var selectedChild = optionRefs.current.find(function (option) {
+        return option.getValue() === value;
+      });
+
+      if (selectedChild) {
+        selectedChild.focus();
+      } else {
+        optionRefs.current[0].focus();
+      }
+    }
+  }, [isExpanded, value]);
   return /*#__PURE__*/React.createElement("ul", _extends({}, rest, {
     role: "listbox",
     hidden: !isExpanded,
     onKeyDown: function onKeyDown(event) {
-      if (event.key === 'Tab') {
+      if (event.key === 'Tab' || event.key === 'Escape') {
         setExpanded(false);
       } else if (event.key === 'Home' || event.key === 'ArrowUp' && event.metaKey) {
-        return moveToTop(options, value, onChange);
+        return moveToTop(optionRefs.current, value, onChange);
       } else if (event.key === 'End' || event.key === 'ArrowDown' && event.metaKey) {
-        return moveToBottom(options, value, onChange);
+        return moveToBottom(optionRefs.current, value, onChange);
       } else if (event.key === 'ArrowUp' || event.key === 'Up') {
-        return moveUp(options, value, onChange);
+        return moveUp(optionRefs.current, value, onChange);
       } else if (event.key === 'ArrowDown' || event.key === 'Down') {
-        return moveDown(options, value, onChange);
+        return moveDown(optionRefs.current, value, onChange);
       }
     }
   }), React.Children.map(children, function (child, index) {
     return React.cloneElement(child, {
       ref: function ref(element) {
-        options[index] = element;
+        optionRefs.current[index] = element;
       }
     });
   }));
