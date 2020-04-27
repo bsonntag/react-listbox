@@ -8685,6 +8685,11 @@ react-popper@^1.3.7:
     typed-styles "^0.0.7"
     warning "^4.0.2"
 
+react-signal@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/react-signal/-/react-signal-0.1.1.tgz#fad72ff2ac8568fa992318c6199d6eb9f96cde15"
+  integrity sha512-lJUwfiSATZqPuMGsfY5BC+GNoBFUrOBh/fX8og3maAN/Wt6RfltZDjJo8nDwPdBAWmdNa38byUwUfuUp4+3aEg==
+
 react-sizeme@^2.6.7:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/react-sizeme/-/react-sizeme-2.6.12.tgz#ed207be5476f4a85bf364e92042520499455453e"

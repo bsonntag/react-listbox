@@ -1,9 +1,12 @@
 import * as React from 'react';
+import { createSignal } from 'react-signal';
 
 const ValueContext = React.createContext();
 const OnChangeContext = React.createContext();
 const LabelContext = React.createContext();
 const ExpandedContext = React.createContext();
+
+const ButtonFocusSignal = createSignal();
 
 function moveDown(children, value, onChange) {
   const selectedIndex = children.findIndex((child) => {
@@ -63,25 +66,33 @@ export function Listbox({ children, value, onChange, ...rest }) {
 
   return (
     <div {...rest} ref={ref}>
-      <ExpandedContext.Provider value={expandedContextValue}>
-        <OnChangeContext.Provider value={onChange}>
-          <LabelContext.Provider value={labelContextValue}>
-            <ValueContext.Provider value={value}>
-              {children}
-            </ValueContext.Provider>
-          </LabelContext.Provider>
-        </OnChangeContext.Provider>
-      </ExpandedContext.Provider>
+      <ButtonFocusSignal.Provider>
+        <ExpandedContext.Provider value={expandedContextValue}>
+          <OnChangeContext.Provider value={onChange}>
+            <LabelContext.Provider value={labelContextValue}>
+              <ValueContext.Provider value={value}>
+                {children}
+              </ValueContext.Provider>
+            </LabelContext.Provider>
+          </OnChangeContext.Provider>
+        </ExpandedContext.Provider>
+      </ButtonFocusSignal.Provider>
     </div>
   );
 }
 
 export function ListboxButton({ children, ...rest }) {
   const { isExpanded, setExpanded } = React.useContext(ExpandedContext);
+  const ref = React.useRef();
+
+  ButtonFocusSignal.useSubscription(() => {
+    ref.current.focus();
+  });
 
   return (
     <button
       {...rest}
+      ref={ref}
       aria-haspopup={'listbox'}
       aria-expanded={isExpanded}
       onClick={(event) => {
@@ -168,6 +179,7 @@ export const ListboxOption = React.forwardRef(function Option(
   const { setLabel } = React.useContext(LabelContext);
   const onChange = React.useContext(OnChangeContext);
   const { setExpanded } = React.useContext(ExpandedContext);
+  const focusButton = ButtonFocusSignal.usePublish();
   const isSelected = value === selectedValue;
 
   React.useImperativeHandle(ref, () => ({
@@ -183,6 +195,12 @@ export const ListboxOption = React.forwardRef(function Option(
     }
   }, [isSelected, setLabel]);
 
+  function handleChange() {
+    setExpanded(false);
+    onChange(value);
+    focusButton();
+  }
+
   return (
     <li
       {...rest}
@@ -191,14 +209,11 @@ export const ListboxOption = React.forwardRef(function Option(
       tabIndex={-1}
       aria-selected={value === selectedValue}
       data-value={value}
-      onClick={() => {
-        setExpanded(false);
-        onChange(value);
-      }}
+      onClick={handleChange}
       onKeyDown={(event) => {
         if (event.key === 'Enter') {
-          setExpanded(false);
-          return onChange(value);
+          event.preventDefault();
+          return handleChange();
         }
       }}
     >
