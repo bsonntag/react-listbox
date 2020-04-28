@@ -14,6 +14,8 @@ exports.ListboxOption = void 0;
 
 var React = _interopRequireWildcard(require("react"));
 
+var _reactSignal = require("react-signal");
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -40,6 +42,7 @@ var ValueContext = React.createContext();
 var OnChangeContext = React.createContext();
 var LabelContext = React.createContext();
 var ExpandedContext = React.createContext();
+var ButtonFocusSignal = (0, _reactSignal.createSignal)();
 
 function moveDown(children, value, onChange) {
   var selectedIndex = children.findIndex(function (child) {
@@ -117,7 +120,7 @@ function Listbox(_ref) {
   }, []);
   return /*#__PURE__*/React.createElement("div", _extends({}, rest, {
     ref: ref
-  }), /*#__PURE__*/React.createElement(ExpandedContext.Provider, {
+  }), /*#__PURE__*/React.createElement(ButtonFocusSignal.Provider, null, /*#__PURE__*/React.createElement(ExpandedContext.Provider, {
     value: expandedContextValue
   }, /*#__PURE__*/React.createElement(OnChangeContext.Provider, {
     value: onChange
@@ -125,7 +128,7 @@ function Listbox(_ref) {
     value: labelContextValue
   }, /*#__PURE__*/React.createElement(ValueContext.Provider, {
     value: value
-  }, children)))));
+  }, children))))));
 }
 
 function ListboxButton(_ref2) {
@@ -136,7 +139,12 @@ function ListboxButton(_ref2) {
       isExpanded = _React$useContext.isExpanded,
       setExpanded = _React$useContext.setExpanded;
 
+  var ref = React.useRef();
+  ButtonFocusSignal.useSubscription(function () {
+    ref.current.focus();
+  });
   return /*#__PURE__*/React.createElement("button", _extends({}, rest, {
+    ref: ref,
     "aria-haspopup": 'listbox',
     "aria-expanded": isExpanded,
     onClick: function onClick(event) {
@@ -225,6 +233,7 @@ var ListboxOption = React.forwardRef(function Option(_ref4, ref) {
   var _React$useContext5 = React.useContext(ExpandedContext),
       setExpanded = _React$useContext5.setExpanded;
 
+  var focusButton = ButtonFocusSignal.usePublish();
   var isSelected = value === selectedValue;
   React.useImperativeHandle(ref, function () {
     return {
@@ -241,20 +250,24 @@ var ListboxOption = React.forwardRef(function Option(_ref4, ref) {
       setLabel(elementRef.current.textContent);
     }
   }, [isSelected, setLabel]);
+
+  function handleChange() {
+    setExpanded(false);
+    onChange(value);
+    focusButton();
+  }
+
   return /*#__PURE__*/React.createElement("li", _extends({}, rest, {
     ref: elementRef,
     role: "option",
     tabIndex: -1,
     "aria-selected": value === selectedValue,
     "data-value": value,
-    onClick: function onClick() {
-      setExpanded(false);
-      onChange(value);
-    },
+    onClick: handleChange,
     onKeyDown: function onKeyDown(event) {
       if (event.key === 'Enter') {
-        setExpanded(false);
-        return onChange(value);
+        event.preventDefault();
+        return handleChange();
       }
     }
   }), children);
