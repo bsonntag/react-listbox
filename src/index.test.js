@@ -291,4 +291,24 @@ describe('Listbox', () => {
 
     expect(getByRole('listbox', { hidden: true })).not.toBeVisible();
   });
+
+  it('should ignore null values in options list', () => {
+    const { getByLabelText } = render(
+      <Listbox value='apple' onChange={() => {}}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          {null}
+
+          {undefined}
+
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    expect(getByLabelText('Fruit')).toHaveTextContent('Apple');
+  });
 });
