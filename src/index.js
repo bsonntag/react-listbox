@@ -123,7 +123,7 @@ export function ListboxList({ children, ...rest }) {
   React.useEffect(() => {
     if (isExpanded) {
       const selectedChild = optionRefs.current.find((option) => {
-        return option.getValue() === value;
+        return option && option.getValue() === value;
       });
 
       if (selectedChild) {

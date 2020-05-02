@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, getByText } from '@testing-library/react';
 import {
   Listbox,
   ListboxButton,
@@ -292,23 +292,26 @@ describe('Listbox', () => {
     expect(getByRole('listbox', { hidden: true })).not.toBeVisible();
   });
 
-  it('should ignore null values in options list', () => {
-    const { getByLabelText } = render(
+  it('should ignore false and nil values in options list', () => {
+    const { getByLabelText, getByText, getByRole } = render(
       <Listbox value='apple' onChange={() => {}}>
         <ListboxButton aria-label='Fruit'>
           <ListboxButtonLabel />
         </ListboxButton>
         <ListboxList>
           {null}
-
           {undefined}
-
+          {false}
           <ListboxOption>Choose one</ListboxOption>
           <ListboxOption value='apple'>Apple</ListboxOption>
         </ListboxList>
       </Listbox>
     );
 
-    expect(getByLabelText('Fruit')).toHaveTextContent('Apple');
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    expect(getByRole('listbox').firstChild).toBe(getByText('Choose one'));
   });
 });
