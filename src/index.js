@@ -160,11 +160,13 @@ export function ListboxList({ children, ...rest }) {
       }}
     >
       {React.Children.map(children, (child, index) => {
-        return React.cloneElement(child, {
-          ref: (element) => {
-            optionRefs.current[index] = element;
-          },
-        });
+        return !child
+          ? null
+          : React.cloneElement(child, {
+              ref: (element) => {
+                optionRefs.current[index] = element;
+              },
+            });
       })}
     </ul>
   );
