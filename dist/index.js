@@ -182,7 +182,7 @@ function ListboxList(_ref3) {
   React.useEffect(function () {
     if (isExpanded) {
       var selectedChild = optionRefs.current.find(function (option) {
-        return option.getValue() === value;
+        return option && option.getValue() === value;
       });
 
       if (selectedChild) {
@@ -209,7 +209,7 @@ function ListboxList(_ref3) {
       }
     }
   }), React.Children.map(children, function (child, index) {
-    return React.cloneElement(child, {
+    return !child ? null : React.cloneElement(child, {
       ref: function ref(element) {
         optionRefs.current[index] = element;
       }
