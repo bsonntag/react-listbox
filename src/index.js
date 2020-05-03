@@ -145,6 +145,13 @@ export function ListboxList({ children, ...rest }) {
     }
   }, [isExpanded, value]);
 
+  React.useEffect(() => {
+    const options = optionRefs.current;
+    return () => {
+      options.map(() => null);
+    };
+  });
+
   return (
     <ul
       {...rest}
