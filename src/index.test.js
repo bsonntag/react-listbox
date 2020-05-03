@@ -61,8 +61,9 @@ describe('Listbox', () => {
   });
 
   it('should focus the selected option when the option list is opened', () => {
+    const onChange = jest.fn();
     const { getByLabelText, getByRole } = render(
-      <Listbox value='apple' onChange={() => {}}>
+      <Listbox value='apple' onChange={onChange}>
         <ListboxButton aria-label='Fruit'>
           <ListboxButtonLabel />
         </ListboxButton>
@@ -80,6 +81,54 @@ describe('Listbox', () => {
     fireEvent.click(button);
 
     expect(getByRole('option', { name: 'Apple' })).toHaveFocus();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('should focus the first option when the option list is opened and no option is selected', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    expect(getByRole('option', { name: 'Apple' })).toHaveFocus();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('should focus the first non-empty option when the option list is opened and no option is selected', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          {null}
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    expect(getByRole('option', { name: 'Apple' })).toHaveFocus();
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('should select an option and close the list when it is clicked', () => {

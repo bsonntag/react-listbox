@@ -131,14 +131,15 @@ export function ListboxList({ children, ...rest }) {
 
   React.useEffect(() => {
     if (isExpanded) {
-      const selectedChild = optionRefs.current.find((option) => {
-        return option && option.getValue() === value;
+      const options = optionRefs.current.filter(Boolean);
+      const selectedChild = options.find((option) => {
+        return option.getValue() === value;
       });
 
       if (selectedChild) {
         selectedChild.focus();
-      } else if (optionRefs.current.length > 0) {
-        optionRefs.current[0].focus();
+      } else if (options.length > 0) {
+        options[0].focus();
       } else {
         ref.current.focus();
       }
