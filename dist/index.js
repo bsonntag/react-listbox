@@ -26,7 +26,7 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
@@ -46,38 +46,48 @@ var ButtonFocusSignal = (0, _reactSignal.createSignal)();
 
 function moveDown(children, value, onChange) {
   if (children.length === 0) return;
-  var selectedIndex = children.findIndex(function (child) {
-    return child.getValue() === value;
+  var currentIndex = children.findIndex(function (child) {
+    return child.hasFocus();
   });
-  var nextIndex = selectedIndex + 1;
-  nextIndex = nextIndex === children.length ? 0 : nextIndex;
-  var nextChild = children[nextIndex];
+  var nextChild = children[(currentIndex + 1) % children.length];
   nextChild.focus();
-  onChange(nextChild.getValue());
+
+  if (onChange) {
+    onChange(nextChild.getValue());
+  }
 }
 
 function moveUp(children, value, onChange) {
   if (children.length === 0) return;
-  var selectedIndex = children.findIndex(function (child) {
-    return child.getValue() === value;
+  var currentIndex = children.findIndex(function (child) {
+    return child.hasFocus();
   });
-  var nextIndex = selectedIndex - 1;
-  nextIndex = nextIndex === -1 ? children.length - 1 : nextIndex;
-  var nextChild = children[nextIndex];
-  nextChild.focus();
-  onChange(nextChild.getValue());
+  var previousIndex = currentIndex - 1;
+  previousIndex = previousIndex < 0 ? children.length - 1 : previousIndex;
+  var previousChild = children[previousIndex];
+  previousChild.focus();
+
+  if (onChange) {
+    onChange(previousChild.getValue());
+  }
 }
 
 function moveToTop(children, value, onChange) {
   if (children.length === 0) return;
   children[0].focus();
-  onChange(children[0].getValue());
+
+  if (onChange) {
+    onChange(children[0].getValue());
+  }
 }
 
 function moveToBottom(children, value, onChange) {
   if (children.length === 0) return;
   children[children.length - 1].focus();
-  onChange(children[children.length - 1].getValue());
+
+  if (onChange) {
+    onChange(children[children.length - 1].getValue());
+  }
 }
 
 function Listbox(_ref) {
@@ -173,7 +183,8 @@ function ListboxButtonLabel() {
 
 function ListboxList(_ref3) {
   var children = _ref3.children,
-      rest = _objectWithoutProperties(_ref3, ["children"]);
+      autoSelect = _ref3.autoSelect,
+      rest = _objectWithoutProperties(_ref3, ["children", "autoSelect"]);
 
   var ref = React.useRef();
   var optionRefs = React.useRef([]);
@@ -184,6 +195,10 @@ function ListboxList(_ref3) {
 
   var onChange = React.useContext(OnChangeContext);
   var value = React.useContext(ValueContext);
+  var onChangeRef = React.useRef(onChange);
+  React.useEffect(function () {
+    onChangeRef.current = onChange;
+  });
   React.useEffect(function () {
     if (isExpanded) {
       var options = optionRefs.current.filter(Boolean);
@@ -194,12 +209,18 @@ function ListboxList(_ref3) {
       if (selectedChild) {
         selectedChild.focus();
       } else if (options.length > 0) {
-        options[0].focus();
+        var firstChild = options[0];
+        firstChild.focus();
+
+        if (autoSelect) {
+          // Use a ref so that this effect doesn't re-run when `onChange` changes.
+          onChangeRef.current(firstChild.getValue());
+        }
       } else {
         ref.current.focus();
       }
     }
-  }, [isExpanded, value]);
+  }, [autoSelect, isExpanded, value]);
   return /*#__PURE__*/React.createElement("ul", _extends({}, rest, {
     ref: ref,
     role: "listbox",
@@ -209,13 +230,13 @@ function ListboxList(_ref3) {
       if (event.key === 'Tab' || event.key === 'Escape') {
         setExpanded(false);
       } else if (event.key === 'Home' || event.key === 'ArrowUp' && event.metaKey) {
-        return moveToTop(optionRefs.current.filter(Boolean), value, onChange);
+        return moveToTop(optionRefs.current.filter(Boolean), value, autoSelect ? onChange : null);
       } else if (event.key === 'End' || event.key === 'ArrowDown' && event.metaKey) {
-        return moveToBottom(optionRefs.current.filter(Boolean), value, onChange);
+        return moveToBottom(optionRefs.current.filter(Boolean), value, autoSelect ? onChange : null);
       } else if (event.key === 'ArrowUp' || event.key === 'Up') {
-        return moveUp(optionRefs.current.filter(Boolean), value, onChange);
+        return moveUp(optionRefs.current.filter(Boolean), value, autoSelect ? onChange : null);
       } else if (event.key === 'ArrowDown' || event.key === 'Down') {
-        return moveDown(optionRefs.current.filter(Boolean), value, onChange);
+        return moveDown(optionRefs.current.filter(Boolean), value, autoSelect ? onChange : null);
       }
     }
   }), React.Children.map(children, function (child, index) {
@@ -249,6 +270,9 @@ var ListboxOption = React.forwardRef(function Option(_ref4, ref) {
     return {
       getValue: function getValue() {
         return value;
+      },
+      hasFocus: function hasFocus() {
+        return elementRef.current === window.document.activeElement;
       },
       focus: function focus() {
         elementRef.current.focus();
