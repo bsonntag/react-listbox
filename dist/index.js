@@ -45,6 +45,7 @@ var ExpandedContext = React.createContext();
 var ButtonFocusSignal = (0, _reactSignal.createSignal)();
 
 function moveDown(children, value, onChange) {
+  if (children.length === 0) return;
   var selectedIndex = children.findIndex(function (child) {
     return child.getValue() === value;
   });
@@ -56,6 +57,7 @@ function moveDown(children, value, onChange) {
 }
 
 function moveUp(children, value, onChange) {
+  if (children.length === 0) return;
   var selectedIndex = children.findIndex(function (child) {
     return child.getValue() === value;
   });
@@ -67,11 +69,13 @@ function moveUp(children, value, onChange) {
 }
 
 function moveToTop(children, value, onChange) {
+  if (children.length === 0) return;
   children[0].focus();
   onChange(children[0].getValue());
 }
 
 function moveToBottom(children, value, onChange) {
+  if (children.length === 0) return;
   children[children.length - 1].focus();
   onChange(children[children.length - 1].getValue());
 }
@@ -171,6 +175,7 @@ function ListboxList(_ref3) {
   var children = _ref3.children,
       rest = _objectWithoutProperties(_ref3, ["children"]);
 
+  var ref = React.useRef();
   var optionRefs = React.useRef([]);
 
   var _React$useContext3 = React.useContext(ExpandedContext),
@@ -187,25 +192,29 @@ function ListboxList(_ref3) {
 
       if (selectedChild) {
         selectedChild.focus();
-      } else {
+      } else if (optionRefs.current.length > 0) {
         optionRefs.current[0].focus();
+      } else {
+        ref.current.focus();
       }
     }
   }, [isExpanded, value]);
   return /*#__PURE__*/React.createElement("ul", _extends({}, rest, {
+    ref: ref,
     role: "listbox",
+    tabIndex: -1,
     hidden: !isExpanded,
     onKeyDown: function onKeyDown(event) {
       if (event.key === 'Tab' || event.key === 'Escape') {
         setExpanded(false);
       } else if (event.key === 'Home' || event.key === 'ArrowUp' && event.metaKey) {
-        return moveToTop(optionRefs.current, value, onChange);
+        return moveToTop(optionRefs.current.filter(Boolean), value, onChange);
       } else if (event.key === 'End' || event.key === 'ArrowDown' && event.metaKey) {
-        return moveToBottom(optionRefs.current, value, onChange);
+        return moveToBottom(optionRefs.current.filter(Boolean), value, onChange);
       } else if (event.key === 'ArrowUp' || event.key === 'Up') {
-        return moveUp(optionRefs.current, value, onChange);
+        return moveUp(optionRefs.current.filter(Boolean), value, onChange);
       } else if (event.key === 'ArrowDown' || event.key === 'Down') {
-        return moveDown(optionRefs.current, value, onChange);
+        return moveDown(optionRefs.current.filter(Boolean), value, onChange);
       }
     }
   }), React.Children.map(children, function (child, index) {
