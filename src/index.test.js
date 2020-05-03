@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, getByText } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import {
   Listbox,
   ListboxButton,
@@ -7,6 +7,15 @@ import {
   ListboxList,
   ListboxOption,
 } from '.';
+
+function StatefulListbox({ children, initialValue }) {
+  const [value, setValue] = React.useState(initialValue);
+  return (
+    <Listbox value={value} onChange={setValue}>
+      {children}
+    </Listbox>
+  );
+}
 
 describe('Listbox', () => {
   it('should select the option that has the provided value', () => {
@@ -265,6 +274,45 @@ describe('Listbox', () => {
     expect(onChange).toHaveBeenCalledWith('orange');
     expect(getByRole('listbox', { hidden: true })).toBeVisible();
     expect(getByRole('option', { name: 'Orange' })).toHaveFocus();
+  });
+
+  it('should ignore empty options when navigating with the keyboard', () => {
+    const { getByLabelText, getByRole } = render(
+      <StatefulListbox initialValue='banana'>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          {undefined}
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          {null}
+          <ListboxOption value='orange'>Orange</ListboxOption>
+          {false}
+        </ListboxList>
+      </StatefulListbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const listbox = getByRole('listbox');
+    const appleOption = getByRole('option', { name: 'Apple' });
+    const bananaOption = getByRole('option', { name: 'Banana' });
+    const orangeOption = getByRole('option', { name: 'Orange' });
+
+    fireEvent.keyDown(listbox, { key: 'ArrowDown' });
+    expect(orangeOption).toHaveFocus();
+
+    fireEvent.keyDown(listbox, { key: 'ArrowUp' });
+    expect(bananaOption).toHaveFocus();
+
+    fireEvent.keyDown(listbox, { key: 'Home' });
+    expect(appleOption).toHaveFocus();
+
+    fireEvent.keyDown(listbox, { key: 'End' });
+    expect(orangeOption).toHaveFocus();
   });
 
   it('should close the options list when the escape key is pressed on an option', () => {
