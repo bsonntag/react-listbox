@@ -11,41 +11,43 @@ const ButtonFocusSignal = createSignal();
 function moveDown(children, value, onChange) {
   if (children.length === 0) return;
 
-  const selectedIndex = children.findIndex((child) => {
-    return child.getValue() === value;
-  });
-  let nextIndex = selectedIndex + 1;
-  nextIndex = nextIndex === children.length ? 0 : nextIndex;
-  const nextChild = children[nextIndex];
+  const currentIndex = children.findIndex((child) => child.hasFocus());
+  const nextChild = children[(currentIndex + 1) % children.length];
   nextChild.focus();
-  onChange(nextChild.getValue());
+  if (onChange) {
+    onChange(nextChild.getValue());
+  }
 }
 
 function moveUp(children, value, onChange) {
   if (children.length === 0) return;
 
-  const selectedIndex = children.findIndex((child) => {
-    return child.getValue() === value;
-  });
-  let nextIndex = selectedIndex - 1;
-  nextIndex = nextIndex === -1 ? children.length - 1 : nextIndex;
-  const nextChild = children[nextIndex];
-  nextChild.focus();
-  onChange(nextChild.getValue());
+  const currentIndex = children.findIndex((child) => child.hasFocus());
+  let previousIndex = currentIndex - 1;
+  previousIndex = previousIndex < 0 ? children.length - 1 : previousIndex;
+  const previousChild = children[previousIndex];
+  previousChild.focus();
+  if (onChange) {
+    onChange(previousChild.getValue());
+  }
 }
 
 function moveToTop(children, value, onChange) {
   if (children.length === 0) return;
 
   children[0].focus();
-  onChange(children[0].getValue());
+  if (onChange) {
+    onChange(children[0].getValue());
+  }
 }
 
 function moveToBottom(children, value, onChange) {
   if (children.length === 0) return;
 
   children[children.length - 1].focus();
-  onChange(children[children.length - 1].getValue());
+  if (onChange) {
+    onChange(children[children.length - 1].getValue());
+  }
 }
 
 export function Listbox({ children, value, onChange, ...rest }) {
@@ -122,12 +124,17 @@ export function ListboxButtonLabel() {
   return useListboxButtonLabel();
 }
 
-export function ListboxList({ children, ...rest }) {
+export function ListboxList({ children, autoSelect, ...rest }) {
   const ref = React.useRef();
   const optionRefs = React.useRef([]);
   const { isExpanded, setExpanded } = React.useContext(ExpandedContext);
   const onChange = React.useContext(OnChangeContext);
   const value = React.useContext(ValueContext);
+  const onChangeRef = React.useRef(onChange);
+
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  });
 
   React.useEffect(() => {
     if (isExpanded) {
@@ -139,12 +146,17 @@ export function ListboxList({ children, ...rest }) {
       if (selectedChild) {
         selectedChild.focus();
       } else if (options.length > 0) {
-        options[0].focus();
+        const firstChild = options[0];
+        firstChild.focus();
+        if (autoSelect) {
+          // Use a ref so that this effect doesn't re-run when `onChange` changes.
+          onChangeRef.current(firstChild.getValue());
+        }
       } else {
         ref.current.focus();
       }
     }
-  }, [isExpanded, value]);
+  }, [autoSelect, isExpanded, value]);
 
   return (
     <ul
@@ -160,7 +172,11 @@ export function ListboxList({ children, ...rest }) {
           event.key === 'Home' ||
           (event.key === 'ArrowUp' && event.metaKey)
         ) {
-          return moveToTop(optionRefs.current.filter(Boolean), value, onChange);
+          return moveToTop(
+            optionRefs.current.filter(Boolean),
+            value,
+            autoSelect ? onChange : null
+          );
         } else if (
           event.key === 'End' ||
           (event.key === 'ArrowDown' && event.metaKey)
@@ -168,12 +184,20 @@ export function ListboxList({ children, ...rest }) {
           return moveToBottom(
             optionRefs.current.filter(Boolean),
             value,
-            onChange
+            autoSelect ? onChange : null
           );
         } else if (event.key === 'ArrowUp' || event.key === 'Up') {
-          return moveUp(optionRefs.current.filter(Boolean), value, onChange);
+          return moveUp(
+            optionRefs.current.filter(Boolean),
+            value,
+            autoSelect ? onChange : null
+          );
         } else if (event.key === 'ArrowDown' || event.key === 'Down') {
-          return moveDown(optionRefs.current.filter(Boolean), value, onChange);
+          return moveDown(
+            optionRefs.current.filter(Boolean),
+            value,
+            autoSelect ? onChange : null
+          );
         }
       }}
     >
@@ -204,6 +228,9 @@ export const ListboxOption = React.forwardRef(function Option(
 
   React.useImperativeHandle(ref, () => ({
     getValue: () => value,
+    hasFocus: () => {
+      return elementRef.current === window.document.activeElement;
+    },
     focus: () => {
       elementRef.current.focus();
     },

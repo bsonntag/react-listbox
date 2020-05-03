@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { withKnobs, boolean } from '@storybook/addon-knobs';
 import styled from 'styled-components';
 import {
   Listbox,
@@ -11,26 +12,13 @@ import {
 export default {
   component: Listbox,
   title: 'Listbox',
+  decorators: [withKnobs],
 };
 
 function StatefulListbox(props) {
   const [value, setValue] = React.useState();
   return <Listbox {...props} value={value} onChange={setValue} />;
 }
-
-export const simple = () => (
-  <StatefulListbox>
-    <ListboxButton>
-      <ListboxButtonLabel />
-    </ListboxButton>
-    <ListboxList>
-      <ListboxOption>Choose a fruit</ListboxOption>
-      <ListboxOption value='apple'>Apple</ListboxOption>
-      <ListboxOption value='banana'>Banana</ListboxOption>
-      <ListboxOption value='orange'>Orange</ListboxOption>
-    </ListboxList>
-  </StatefulListbox>
-);
 
 const StyledStatefulListbox = styled(StatefulListbox)`
   display: inline-block;
@@ -87,11 +75,25 @@ export const withStyles = () => (
     <StyledListboxButton>
       <ListboxButtonLabel />
     </StyledListboxButton>
-    <StyledListboxList>
+    <StyledListboxList autoSelect={boolean('Auto select', false)}>
       <StyledListboxOption>Choose a fruit</StyledListboxOption>
       <StyledListboxOption value='apple'>Apple</StyledListboxOption>
       <StyledListboxOption value='banana'>Banana</StyledListboxOption>
       <StyledListboxOption value='orange'>Orange</StyledListboxOption>
     </StyledListboxList>
   </StyledStatefulListbox>
+);
+
+export const withoutStyles = () => (
+  <StatefulListbox>
+    <ListboxButton>
+      <ListboxButtonLabel />
+    </ListboxButton>
+    <ListboxList autoSelect={boolean('Auto select', false)}>
+      <ListboxOption>Choose a fruit</ListboxOption>
+      <ListboxOption value='apple'>Apple</ListboxOption>
+      <ListboxOption value='banana'>Banana</ListboxOption>
+      <ListboxOption value='orange'>Orange</ListboxOption>
+    </ListboxList>
+  </StatefulListbox>
 );

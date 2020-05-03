@@ -131,6 +131,29 @@ describe('Listbox', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('should select the first option when the option list is opened and no option is selected and `autoSelect` is true', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList autoSelect>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    expect(getByRole('option', { name: 'Apple' })).toHaveFocus();
+    expect(onChange).toHaveBeenCalledWith('apple');
+  });
+
   it('should select an option and close the list when it is clicked', () => {
     const onChange = jest.fn();
     const { getByLabelText, getByRole } = render(
@@ -213,7 +236,7 @@ describe('Listbox', () => {
     expect(button).toHaveFocus();
   });
 
-  it('should select the next option when the down arrow key is pressed', () => {
+  it('should focus the next option when the down arrow key is pressed', () => {
     const onChange = jest.fn();
     const { getByLabelText, getByRole } = render(
       <Listbox value='apple' onChange={onChange}>
@@ -236,12 +259,68 @@ describe('Listbox', () => {
     const option = getByRole('option', { name: 'Apple' });
     fireEvent.keyDown(option, { key: 'ArrowDown' });
 
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getByRole('listbox', { hidden: true })).toBeVisible();
+    expect(getByRole('option', { name: 'Banana' })).toHaveFocus();
+  });
+
+  it('should select the next option when the down arrow key is pressed and `autoSelect` is true', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox value='apple' onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList autoSelect>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const option = getByRole('option', { name: 'Apple' });
+    fireEvent.keyDown(option, { key: 'ArrowDown' });
+
     expect(onChange).toHaveBeenCalledWith('banana');
     expect(getByRole('listbox', { hidden: true })).toBeVisible();
     expect(getByRole('option', { name: 'Banana' })).toHaveFocus();
   });
 
-  it('should select the previous option when the up arrow key is pressed', () => {
+  it('should focus the first option when the down arrow key is pressed on the last option', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox value='orange' onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const option = getByRole('option', { name: 'Orange' });
+    fireEvent.keyDown(option, { key: 'ArrowDown' });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getByRole('listbox', { hidden: true })).toBeVisible();
+    expect(getByRole('option', { name: 'Choose one' })).toHaveFocus();
+  });
+
+  it('should focus the previous option when the up arrow key is pressed', () => {
     const onChange = jest.fn();
     const { getByLabelText, getByRole } = render(
       <Listbox value='banana' onChange={onChange}>
@@ -264,12 +343,68 @@ describe('Listbox', () => {
     const option = getByRole('option', { name: 'Banana' });
     fireEvent.keyDown(option, { key: 'ArrowUp' });
 
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getByRole('listbox', { hidden: true })).toBeVisible();
+    expect(getByRole('option', { name: 'Apple' })).toHaveFocus();
+  });
+
+  it('should select the previous option when the up arrow key is pressed and `autoSelect` is true', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox value='banana' onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList autoSelect>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const option = getByRole('option', { name: 'Banana' });
+    fireEvent.keyDown(option, { key: 'ArrowUp' });
+
     expect(onChange).toHaveBeenCalledWith('apple');
     expect(getByRole('listbox', { hidden: true })).toBeVisible();
     expect(getByRole('option', { name: 'Apple' })).toHaveFocus();
   });
 
-  it('should select the first option when the home key is pressed', () => {
+  it('should focus the last option when the up arrow key is pressed on the first option', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const option = getByRole('option', { name: 'Choose one' });
+    fireEvent.keyDown(option, { key: 'ArrowUp' });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getByRole('listbox', { hidden: true })).toBeVisible();
+    expect(getByRole('option', { name: 'Orange' })).toHaveFocus();
+  });
+
+  it('should focus the first option when the home key is pressed', () => {
     const onChange = jest.fn();
     const { getByLabelText, getByRole } = render(
       <Listbox value='apple' onChange={onChange}>
@@ -292,12 +427,40 @@ describe('Listbox', () => {
     const option = getByRole('option', { name: 'Apple' });
     fireEvent.keyDown(option, { key: 'Home' });
 
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getByRole('listbox', { hidden: true })).toBeVisible();
+    expect(getByRole('option', { name: 'Choose one' })).toHaveFocus();
+  });
+
+  it('should select the first option when the home key is pressed and `autoSelect` is true', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox value='apple' onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList autoSelect>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const option = getByRole('option', { name: 'Apple' });
+    fireEvent.keyDown(option, { key: 'Home' });
+
     expect(onChange).toHaveBeenCalledWith(undefined);
     expect(getByRole('listbox', { hidden: true })).toBeVisible();
     expect(getByRole('option', { name: 'Choose one' })).toHaveFocus();
   });
 
-  it('should select the last option when the end key is pressed', () => {
+  it('should focus the last option when the end key is pressed', () => {
     const onChange = jest.fn();
     const { getByLabelText, getByRole } = render(
       <Listbox value='apple' onChange={onChange}>
@@ -305,6 +468,34 @@ describe('Listbox', () => {
           <ListboxButtonLabel />
         </ListboxButton>
         <ListboxList>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    // Open listbox.
+    const button = getByLabelText('Fruit');
+    fireEvent.click(button);
+
+    const option = getByRole('option', { name: 'Apple' });
+    fireEvent.keyDown(option, { key: 'End' });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getByRole('listbox', { hidden: true })).toBeVisible();
+    expect(getByRole('option', { name: 'Orange' })).toHaveFocus();
+  });
+
+  it('should select the last option when the end key is pressed and `autoSelect` is true', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByRole } = render(
+      <Listbox value='apple' onChange={onChange}>
+        <ListboxButton aria-label='Fruit'>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList autoSelect>
           <ListboxOption>Choose one</ListboxOption>
           <ListboxOption value='apple'>Apple</ListboxOption>
           <ListboxOption value='banana'>Banana</ListboxOption>
