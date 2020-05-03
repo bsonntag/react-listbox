@@ -186,14 +186,15 @@ function ListboxList(_ref3) {
   var value = React.useContext(ValueContext);
   React.useEffect(function () {
     if (isExpanded) {
-      var selectedChild = optionRefs.current.find(function (option) {
-        return option && option.getValue() === value;
+      var options = optionRefs.current.filter(Boolean);
+      var selectedChild = options.find(function (option) {
+        return option.getValue() === value;
       });
 
       if (selectedChild) {
         selectedChild.focus();
-      } else if (optionRefs.current.length > 0) {
-        optionRefs.current[0].focus();
+      } else if (options.length > 0) {
+        options[0].focus();
       } else {
         ref.current.focus();
       }
