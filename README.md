@@ -1,5 +1,7 @@
 # react-listbox
 
+[![CircleCI build](https://circleci.com/gh/bsonntag/react-listbox.svg?style=svg)](https://circleci.com/gh/bsonntag/react-listbox)
+
 A customizable, accessible and controllable listbox component for React.
 
 ## Installation
