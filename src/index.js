@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { createSignal } from 'react-signal';
+import { refSetter } from './refs';
 
 const ValueContext = React.createContext();
 const OnChangeContext = React.createContext();
@@ -50,7 +51,10 @@ function moveToBottom(children, value, onChange) {
   }
 }
 
-export function Listbox({ children, value, onChange, ...rest }) {
+export const Listbox = React.forwardRef(function Listbox(
+  { children, value, onChange, ...rest },
+  forwardedRef
+) {
   const ref = React.useRef();
   const [label, setLabel] = React.useState(null);
   const [isExpanded, setExpanded] = React.useState(false);
@@ -75,7 +79,7 @@ export function Listbox({ children, value, onChange, ...rest }) {
   }, []);
 
   return (
-    <div {...rest} ref={ref}>
+    <div {...rest} ref={refSetter(ref, forwardedRef)}>
       <ButtonFocusSignal.Provider>
         <ExpandedContext.Provider value={expandedContextValue}>
           <OnChangeContext.Provider value={onChange}>
@@ -89,9 +93,12 @@ export function Listbox({ children, value, onChange, ...rest }) {
       </ButtonFocusSignal.Provider>
     </div>
   );
-}
+});
 
-export function ListboxButton({ children, ...rest }) {
+export const ListboxButton = React.forwardRef(function ListboxButton(
+  { children, ...rest },
+  forwardedRef
+) {
   const { isExpanded, setExpanded } = React.useContext(ExpandedContext);
   const ref = React.useRef();
 
@@ -102,7 +109,7 @@ export function ListboxButton({ children, ...rest }) {
   return (
     <button
       {...rest}
-      ref={ref}
+      ref={refSetter(ref, forwardedRef)}
       aria-haspopup={'listbox'}
       aria-expanded={isExpanded}
       onClick={(event) => {
@@ -113,7 +120,7 @@ export function ListboxButton({ children, ...rest }) {
       {children}
     </button>
   );
-}
+});
 
 export function useListboxButtonLabel() {
   const { label } = React.useContext(LabelContext);
@@ -124,7 +131,10 @@ export function ListboxButtonLabel() {
   return useListboxButtonLabel();
 }
 
-export function ListboxList({ children, autoSelect, ...rest }) {
+export const ListboxList = React.forwardRef(function ListboxList(
+  { children, autoSelect, ...rest },
+  forwardedRef
+) {
   const ref = React.useRef();
   const optionRefs = React.useRef([]);
   const { isExpanded, setExpanded } = React.useContext(ExpandedContext);
@@ -161,7 +171,7 @@ export function ListboxList({ children, autoSelect, ...rest }) {
   return (
     <ul
       {...rest}
-      ref={ref}
+      ref={refSetter(ref, forwardedRef)}
       role='listbox'
       tabIndex={-1}
       hidden={!isExpanded}
@@ -212,7 +222,7 @@ export function ListboxList({ children, autoSelect, ...rest }) {
       })}
     </ul>
   );
-}
+});
 
 export const ListboxOption = React.forwardRef(function Option(
   { children, value, ...rest },

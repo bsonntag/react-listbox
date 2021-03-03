@@ -602,4 +602,28 @@ describe('Listbox', () => {
 
     expect(getByRole('listbox').firstChild).toBe(getByText('Choose one'));
   });
+
+  it('should forward refs', () => {
+    const listboxRef = React.createRef();
+    const listboxButtonRef = React.createRef();
+    const listboxListRef = React.createRef();
+
+    render(
+      <Listbox value='apple' onChange={() => {}} ref={listboxRef}>
+        <ListboxButton aria-label='Fruit' ref={listboxButtonRef}>
+          <ListboxButtonLabel />
+        </ListboxButton>
+        <ListboxList ref={listboxListRef}>
+          <ListboxOption>Choose one</ListboxOption>
+          <ListboxOption value='apple'>Apple</ListboxOption>
+          <ListboxOption value='banana'>Banana</ListboxOption>
+          <ListboxOption value='orange'>Orange</ListboxOption>
+        </ListboxList>
+      </Listbox>
+    );
+
+    expect(listboxRef.current.tagName).toBe('DIV');
+    expect(listboxButtonRef.current.tagName).toBe('BUTTON');
+    expect(listboxListRef.current.tagName).toBe('UL');
+  });
 });
