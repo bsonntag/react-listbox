@@ -5,16 +5,15 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Listbox = Listbox;
-exports.ListboxButton = ListboxButton;
 exports.useListboxButtonLabel = useListboxButtonLabel;
 exports.ListboxButtonLabel = ListboxButtonLabel;
-exports.ListboxList = ListboxList;
-exports.ListboxOption = void 0;
+exports.ListboxOption = exports.ListboxList = exports.ListboxButton = exports.Listbox = void 0;
 
 var React = _interopRequireWildcard(require("react"));
 
 var _reactSignal = require("react-signal");
+
+var _refs = require("./refs");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
@@ -90,7 +89,7 @@ function moveToBottom(children, value, onChange) {
   }
 }
 
-function Listbox(_ref) {
+var Listbox = React.forwardRef(function Listbox(_ref, forwardedRef) {
   var children = _ref.children,
       value = _ref.value,
       onChange = _ref.onChange,
@@ -133,7 +132,7 @@ function Listbox(_ref) {
     };
   }, []);
   return /*#__PURE__*/React.createElement("div", _extends({}, rest, {
-    ref: ref
+    ref: (0, _refs.refSetter)(ref, forwardedRef)
   }), /*#__PURE__*/React.createElement(ButtonFocusSignal.Provider, null, /*#__PURE__*/React.createElement(ExpandedContext.Provider, {
     value: expandedContextValue
   }, /*#__PURE__*/React.createElement(OnChangeContext.Provider, {
@@ -143,9 +142,9 @@ function Listbox(_ref) {
   }, /*#__PURE__*/React.createElement(ValueContext.Provider, {
     value: value
   }, children))))));
-}
-
-function ListboxButton(_ref2) {
+});
+exports.Listbox = Listbox;
+var ListboxButton = React.forwardRef(function ListboxButton(_ref2, forwardedRef) {
   var children = _ref2.children,
       rest = _objectWithoutProperties(_ref2, ["children"]);
 
@@ -158,7 +157,7 @@ function ListboxButton(_ref2) {
     ref.current.focus();
   });
   return /*#__PURE__*/React.createElement("button", _extends({}, rest, {
-    ref: ref,
+    ref: (0, _refs.refSetter)(ref, forwardedRef),
     "aria-haspopup": 'listbox',
     "aria-expanded": isExpanded,
     onClick: function onClick(event) {
@@ -168,7 +167,8 @@ function ListboxButton(_ref2) {
       });
     }
   }), children);
-}
+});
+exports.ListboxButton = ListboxButton;
 
 function useListboxButtonLabel() {
   var _React$useContext2 = React.useContext(LabelContext),
@@ -181,7 +181,7 @@ function ListboxButtonLabel() {
   return useListboxButtonLabel();
 }
 
-function ListboxList(_ref3) {
+var ListboxList = React.forwardRef(function ListboxList(_ref3, forwardedRef) {
   var children = _ref3.children,
       autoSelect = _ref3.autoSelect,
       rest = _objectWithoutProperties(_ref3, ["children", "autoSelect"]);
@@ -222,7 +222,7 @@ function ListboxList(_ref3) {
     }
   }, [autoSelect, isExpanded, value]);
   return /*#__PURE__*/React.createElement("ul", _extends({}, rest, {
-    ref: ref,
+    ref: (0, _refs.refSetter)(ref, forwardedRef),
     role: "listbox",
     tabIndex: -1,
     hidden: !isExpanded,
@@ -246,8 +246,8 @@ function ListboxList(_ref3) {
       }
     });
   }));
-}
-
+});
+exports.ListboxList = ListboxList;
 var ListboxOption = React.forwardRef(function Option(_ref4, ref) {
   var children = _ref4.children,
       value = _ref4.value,
